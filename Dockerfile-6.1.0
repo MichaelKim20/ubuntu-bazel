@@ -5,10 +5,27 @@ RUN apt-get update && \
     ln -fs /usr/share/zoneinfo/UCT /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata
 
-RUN apt-get install -y wget g++ unzip zip nano python cmake git libssl-dev libgmp-dev libtinfo5 libprotobuf-dev
+RUN apt-get install -y wget g++ unzip zip nano python python3 cmake git libssl-dev libgmp-dev libtinfo5 libprotobuf-dev
 
 RUN wget https://github.com/bazelbuild/bazel/releases/download/6.1.0/bazel-6.1.0-installer-linux-x86_64.sh && \
     chmod +x bazel-6.1.0-installer-linux-x86_64.sh && \
     ./bazel-6.1.0-installer-linux-x86_64.sh --user
+
+RUN apt-get -y install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg2 \
+    software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && \
+    add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+      $(lsb_release -cs) \
+      stable" && \
+   apt-get update && \
+   apt-get -y install docker-ce
+
+RUN groupadd -f docker
+RUN usermod -aG docker root
 
 ENV PATH=/root/bin:$PATH
